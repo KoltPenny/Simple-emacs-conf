@@ -13,7 +13,8 @@
      ("melpa" . "https://melpa.org/#/packages/")))
  '(package-selected-packages
    '(elixir-mode csv-mode yaml-mode emacsql emacsql-mysql slime web-mode vue-mode php-mode memoize go-mode gited flycheck bison-mode anaconda-mode))
- '(pop-up-frames nil))
+ '(pop-up-frames nil)
+ '(typescript-indent-level 2))
 
 
 ;;Set your lisp system and, optionally some contribs
