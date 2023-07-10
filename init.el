@@ -13,23 +13,83 @@
    '(("gnu" . "https://elpa.gnu.org/packages/")
      ("melpa" . "https://melpa.org/packages/")))
  '(package-selected-packages
-   '(company-go gdscript-mode doom-modeline doom-themes lsp-mode go-complete go-autocomplete elixir-mode csv-mode yaml-mode emacsql emacsql-mysql slime web-mode vue-mode php-mode memoize gited flycheck bison-mode))
+   '(org-modern org-bullets eglot sly zig-mode rainbow-delimiters nginx-mode company-go gdscript-mode doom-modeline doom-themes lsp-mode go-complete go-autocomplete elixir-mode csv-mode yaml-mode emacsql emacsql-mysql slime web-mode vue-mode php-mode memoize gited flycheck bison-mode))
  '(pop-up-frames nil)
- '(typescript-indent-level 2))
+ '(typescript-indent-level 2)
+ '(warning-suppress-types
+   '((comp)
+     (comp)
+     (comp)
+     (comp)
+     (comp)
+     (comp)
+     (comp)
+     (comp)
+     (comp)
+     (comp)
+     (comp)
+     (comp))))
 
 (package-initialize)
+
 (setq shell-command-switch "-ic")
 
-;;Load Theme
+;;Load Theme & Visual configs
 (load-theme 'doom-rouge t)
-;Transparency
-(set-frame-parameter (selected-frame) 'alpha '(85 50))
-;;Load PATH
+(doom-modeline-mode t)
+(setq doom-modeline-height 0)
 
-;;Enable LSṔ
+;;Relative numbered lines
+(setq display-line-numbers-type 'relative)
+(global-display-line-numbers-mode)
+
+;;ORG MODE
+(with-eval-after-load 'org (global-org-modern-mode))
+
+;Transparency
+
+;;Load PATH
+(defun set-exec-path-from-shell-PATH ()
+  "Set up Emacs' `exec-path' and PATH environment variable to match
+that used by the user's shell.
+
+This is particularly useful under Mac OS X and macOS, where GUI
+apps are not started from a shell."
+  (interactive)
+  (let ((path-from-shell (replace-regexp-in-string
+			  "[ \t\n]*$" "" (shell-command-to-string
+					  "$SHELL --login -c 'echo $PATH'"
+						    ))))
+    (setenv "PATH" path-from-shell)
+    (setq exec-path (split-string path-from-shell path-separator))))
+
+(set-exec-path-from-shell-PATH)
+
+;;EVAL-BUFFER
+(add-hook 'emacs-lisp-mode-hook
+          (define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-buffer))
+
+;;Enable LSP
 (require 'lsp-mode)
 (require 'dash)
+(add-to-list 'lsp-language-id-configuration '(zig-mode . "zig"))
+;;Remote
+;;GO
 (add-hook 'go-mode-hook #'lsp-deferred)
+(lsp-register-client
+ (make-lsp-client :new-connection (lsp-stdio-connection "gopls")
+                  :major-modes '(go-mode)
+                  :server-id 'gopls))
+;;Zig
+(add-hook 'zig-mode-hook #'lsp-deferred)
+(lsp-register-client
+    (make-lsp-client :new-connection (lsp-stdio-connection "zls")
+                     :activation-fn (lsp-activate-on "zig")
+                     :server-id 'zls))
+
+
+;;Load GDSCript autosave
+(setq gdscript-gdformat-save-and-format t)
 
 ;; Set up before-save hooks to format buffer and add/delete imports.
 ;; Make sure you don't have other gofmt/goimports hooks enabled.
@@ -38,13 +98,18 @@
   (add-hook 'before-save-hook #'lsp-organize-imports t t))
 (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
 
+;;Python hooks
+(add-hook 'python-mode-hook
+            (lambda ()
+              (lsp-python-enable)))
+
 ;;Set your lisp system and, optionally some contribs
-(setq inferior-lisp-program "/usr/bin/sbcl")
-(setq slime-contribs '(slime-fancy))
-(setq slime-lisp-implementations
-      '((sbcl ("/usr/bin/sbcl")
-	      :coding-system utf-8-unix
-	      :env ("SBCL_HOME=/usr/lib/sbcl"))))
+;;(setq inferior-lisp-program "/usr/bin/sbcl")
+;; (setq slime-contribs '(slime-fancy))
+;; (setq slime-lisp-implementations
+;;       '((sbcl ("/usr/bin/sbcl")
+;; 	      :coding-system utf-8-unix
+;; 	      :env ("SBCL_HOME=/usr/lib/sbcl"))))
 	
 ;; Configuration
 (setq create-lockfiles nil)
@@ -95,6 +160,7 @@
 
 (add-to-list 'auto-mode-alist '("\\.php\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.html\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.css\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.vue\\'" . web-mode))
 
 ;;Controls
@@ -112,3 +178,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+
+(put 'dired-find-alternate-file 'disabled nil)
