@@ -1,52 +1,128 @@
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(auth-source-save-behavior nil)
- '(backup-directory-alist '((".*" . "/home/kolt/.saves")))
- '(custom-safe-themes
-   '("e2c926ced58e48afc87f4415af9b7f7b58e62ec792659fcb626e8cba674d2065" default))
- '(inhibit-startup-screen t)
- '(initial-frame-alist '((fullscreen . maximized)))
- '(package-archives
+;PACKAGE REPOSITORIES
+(setq package-archives
    '(("gnu" . "https://elpa.gnu.org/packages/")
      ("melpa" . "https://melpa.org/packages/")))
- '(package-selected-packages
-   '(org-modern org-bullets eglot sly zig-mode rainbow-delimiters nginx-mode company-go gdscript-mode doom-modeline doom-themes lsp-mode go-complete go-autocomplete elixir-mode csv-mode yaml-mode emacsql emacsql-mysql slime web-mode vue-mode php-mode memoize gited flycheck bison-mode))
- '(pop-up-frames nil)
- '(typescript-indent-level 2)
- '(warning-suppress-types
-   '((comp)
-     (comp)
-     (comp)
-     (comp)
-     (comp)
-     (comp)
-     (comp)
-     (comp)
-     (comp)
-     (comp)
-     (comp)
-     (comp))))
 
-(package-initialize)
+;;PACKAGES LOAD
+(add-to-list 'load-path "~/.emacs.d/manual")
+(add-to-list 'load-path "~/.emacs.d/manual/nginx-mode")
+(add-to-list 'load-path "~/.emacs.d/manual/sly")
+(add-to-list 'load-path "~/.emacs.d/manual/lua-mode")
+(add-to-list 'load-path "~/.emacs.d/manual/emacs-gdscript-mode")
 
-(setq shell-command-switch "-ic")
 
-;;Load Theme & Visual configs
-(load-theme 'doom-rouge t)
-(doom-modeline-mode t)
-(setq doom-modeline-height 0)
+;;APPEARANCE
+(setq auth-source-save-behavior nil)
+(setq backup-directory-alist `(("." . , (concat user-emacs-directory "/home/kolt/.saves"))))
+(setq inhibit-startup-screen t)
+(setq pop-up-frames nil)
+(setq cursor-type 'hollow)
+(setq border-width 0)
+;;(setq frame-fullscreen t)
+(setq column-number-mode t)
+(setq-default show-trailing-whitespace t)
+(setenv "ECONF" "~/.emacs.d/init.el")
+(setenv "STF" "/ssh:Stefanini@stefamac:~/go/src/gitlab.krakenmx.wtf")
+(setenv "SERVER" "/ssh:root@koltpenny.com#11822:~")
+
+;;Frame and behaviour config
+(set-frame-parameter nil 'fullscreen 'fullboth)
+(scroll-bar-mode -1)
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(blink-cursor-mode 1)
+
 
 ;;Relative numbered lines
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode)
 
-;;ORG MODE
+;;TOOLS
+;;Reformatter
+(require 'reformatter)
+;;Sly
+(require 'sly)
+(setq inferior-lisp-program "/usr/local/bin/sbcl")
+;;Eglot
+(require 'eglot)
+;;Org Modern
+(require 'org-modern)
 (with-eval-after-load 'org (global-org-modern-mode))
+;;Company
+(require 'company)
+(require 'company-abbrev)
+(require 'company-bbdb)
+(require 'company-capf)
+(require 'company-clang)
+(require 'company-cmake)
+(require 'company-css)
+(require 'company-dabbrev-code)
+(require 'company-dabbrev)
+(require 'company-etags)
+(require 'company-files)
+(require 'company-gtags)
+(require 'company-ispell)
+(require 'company-keywords)
+(require 'company-nxml)
+(require 'company-oddmuse)
+(require 'company-semantic)
+(require 'company-template)
+(require 'company-tempo)
+(require 'company-tests)
+(require 'company-tng)
+(require 'company-yasnippet)
+(add-hook 'after-init-hook 'global-company-mode)
+;Languages
+(require 'go-mode)
+(require 'zig-mode)
+(require 'lua-mode)
+(require 'protobuf-mode)
+(require 'web-mode)
+(require 'dockerfile-mode)
+(require 'gdscript-mode)
+(require 'nginx-mode)
 
-;Transparency
+;;Themes
+(require 'moe-dark-theme)
+(require 'moe-light-theme)
+(require 'moe-theme)
+
+(load-theme 'moe-dark t)
+
+;;Controls
+;Key mods
+(global-set-key "\C-z" 'replace-string)
+(global-set-key '[8711] 'nil)
+;Resize
+(global-set-key (kbd "C-S-b") 'shrink-window-horizontally)
+(global-set-key (kbd "C-S-f") 'enlarge-window-horizontally)
+(global-set-key (kbd "C-S-n") 'shrink-window)
+(global-set-key (kbd "C-S-p") 'enlarge-window)
+;Move between windows
+(global-set-key (kbd "C-s-b")  'windmove-left)
+(global-set-key (kbd "C-s-f") 'windmove-right)
+(global-set-key (kbd "C-s-p")    'windmove-up)
+(global-set-key (kbd "C-s-n")  'windmove-down)
+
+(electric-pair-mode 1)
+(add-to-list 'exec-path "/home/kolt/.bashrc")
+
+;;Tabs and indents
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 2)
+(setq js-indent-level 2)
+
+;;Web Mode hooks
+(defun my-web-mode-hook ()
+  "Hooks for Web mode."
+  (setq web-mode-markup-indent-offset 2))
+(add-hook 'web-mode-hook  'my-web-mode-hook)
+
+
+(add-to-list 'auto-mode-alist '("\\.php\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.html\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.css\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.vue\\'" . web-mode))
 
 ;;Load PATH
 (defun set-exec-path-from-shell-PATH ()
@@ -65,119 +141,11 @@ apps are not started from a shell."
 
 (set-exec-path-from-shell-PATH)
 
+;;Set ESHELL Prompt
+(setq eshell-prompt-function
+      (lambda ()
+	(concat (car (last (split-string (eshell/pwd) "/"))) " $ ")))
+
 ;;EVAL-BUFFER
 (add-hook 'emacs-lisp-mode-hook
           (define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-buffer))
-
-;;Enable LSP
-(require 'lsp-mode)
-(require 'dash)
-(add-to-list 'lsp-language-id-configuration '(zig-mode . "zig"))
-;;Remote
-;;GO
-(add-hook 'go-mode-hook #'lsp-deferred)
-(lsp-register-client
- (make-lsp-client :new-connection (lsp-stdio-connection "gopls")
-                  :major-modes '(go-mode)
-                  :server-id 'gopls))
-;;Zig
-(add-hook 'zig-mode-hook #'lsp-deferred)
-(lsp-register-client
-    (make-lsp-client :new-connection (lsp-stdio-connection "zls")
-                     :activation-fn (lsp-activate-on "zig")
-                     :server-id 'zls))
-
-
-;;Load GDSCript autosave
-(setq gdscript-gdformat-save-and-format t)
-
-;; Set up before-save hooks to format buffer and add/delete imports.
-;; Make sure you don't have other gofmt/goimports hooks enabled.
-(defun lsp-go-install-save-hooks ()
-  (add-hook 'before-save-hook #'lsp-format-buffer t t)
-  (add-hook 'before-save-hook #'lsp-organize-imports t t))
-(add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
-
-;;Python hooks
-(add-hook 'python-mode-hook
-            (lambda ()
-              (lsp-python-enable)))
-
-;;Set your lisp system and, optionally some contribs
-;;(setq inferior-lisp-program "/usr/bin/sbcl")
-;; (setq slime-contribs '(slime-fancy))
-;; (setq slime-lisp-implementations
-;;       '((sbcl ("/usr/bin/sbcl")
-;; 	      :coding-system utf-8-unix
-;; 	      :env ("SBCL_HOME=/usr/lib/sbcl"))))
-	
-;; Configuration
-(setq create-lockfiles nil)
-
-(scroll-bar-mode -1)
-(menu-bar-mode -1)
-(tool-bar-mode -1)
-(blink-cursor-mode 1)
-
-(put 'set-goal-column 'disabled nil)
-
-;;KEYBINDS
-;(global-set-key "\C-z" 'highlight-symbol)
-(global-set-key "\C-z" 'replace-string)
-(global-set-key '[8711] 'nil)
-;Move between windows
-(global-set-key (kbd "C-c b")  'windmove-left)
-(global-set-key (kbd "C-c f") 'windmove-right)
-(global-set-key (kbd "C-c p")    'windmove-up)
-(global-set-key (kbd "C-c n")  'windmove-down)
-
-
-(setq-default indent-tabs-mode nil)
-(setq-default tab-width 2)
-
-;(set-frame-parameter nil 'fullscreen 'fullboth)
-(require 'iso-transl)
-
-(electric-pair-mode 1)
-
-(set-face-attribute 'default nil :font "OCR A Std-9")
-
-;;Golang Configuration
-
-
-;;Python Configuration
-(add-hook 'python-mode-hook 'anaconda-mode)
-(setq python-shell-interpreter "python3")
-(add-to-list 'exec-path "/home/kolt/.bashrc")
-
-(setq js-indent-level 2)
-
-(defun my-web-mode-hook ()
-  "Hooks for Web mode."
-  (setq web-mode-markup-indent-offset 2))
-(add-hook 'web-mode-hook  'my-web-mode-hook)
-
-
-(add-to-list 'auto-mode-alist '("\\.php\\'" . web-mode))
-(add-to-list 'auto-mode-alist '("\\.html\\'" . web-mode))
-(add-to-list 'auto-mode-alist '("\\.css\\'" . web-mode))
-(add-to-list 'auto-mode-alist '("\\.vue\\'" . web-mode))
-
-;;Controls
-(global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
-(global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
-(global-set-key (kbd "S-C-<down>") 'shrink-window)
-(global-set-key (kbd "S-C-<up>") 'enlarge-window)
-
-;;ESHELL
-(setq eshell-prompt-function
-			(lambda () (concat (car (last (split-string (eshell/pwd) "/"))) " $ ")))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-
-
-(put 'dired-find-alternate-file 'disabled nil)
